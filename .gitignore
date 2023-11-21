@@ -1,0 +1,7 @@
+*-data/
+*.pyc
+*.DS_Store
+/Wildfire_Detection/DETR/custom-model/
+/Wildfire_Detection/DETR/lightning_logs/
+/Wildfire_Detection/YOLOv8/runs/
+
