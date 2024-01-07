@@ -1,14 +1,12 @@
 import math
 import random
-from collections import deque
-import airsim
 import os
+import cv2
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-from PIL import Image
 from setuptools import glob
 from env import DroneEnv
 from torch.utils.tensorboard import SummaryWriter
@@ -42,8 +40,7 @@ class DQN(nn.Module):
 
 
 class DDQN_Agent:
-    def __init__(self, useDepth=False):
-        self.useDepth = useDepth
+    def __init__(self):
         self.eps_start = 0.9
         self.eps_end = 0.05
         self.eps_decay = 30000
@@ -66,7 +63,7 @@ class DDQN_Agent:
         self.test_network.eval()
         self.updateNetworks()
 
-        self.env = DroneEnv(useDepth)
+        self.env = DroneEnv()
         self.optimizer = optim.Adam(self.policy.parameters(), self.learning_rate)
 
         if torch.cuda.is_available():
@@ -75,20 +72,22 @@ class DDQN_Agent:
         else:
             print("Using CPU")
 
-        # LOGGING
+        # Logging
         cwd = os.getcwd()
         self.save_dir = os.path.join(cwd, "saved_models")
         if not os.path.exists(self.save_dir):
             os.mkdir("saved_models")
-        if not os.path.exists(os.path.join(cwd, "videos")):
-            os.mkdir("videos")
+        if not os.path.exists(os.path.join(cwd, "train_videos")):
+            os.mkdir("train_videos")
+        if not os.path.exists(os.path.join(cwd, "test_videos")):
+            os.mkdir("test_videos")
 
         if torch.cuda.is_available():
             self.policy = self.policy.to(device)  # to use GPU
             self.target = self.target.to(device)  # to use GPU
             self.test_network = self.test_network.to(device)  # to use GPU
 
-        # model backup
+        # Model backup
         files = glob.glob(self.save_dir + '\\*.pt')
         if len(files) > 0:
             files.sort(key=os.path.getmtime)
@@ -102,7 +101,6 @@ class DDQN_Agent:
                   "\nModel: ", file,
                   "\nSteps done: ", self.steps_done,
                   "\nEpisode: ", self.episode)
-
 
         else:
             if os.path.exists("log.txt"):
@@ -142,7 +140,6 @@ class DDQN_Agent:
         )
         self.steps_done += 1
         if random.random() > self.eps_threshold:
-            # print("greedy")
             if torch.cuda.is_available():
                 action = np.argmax(self.policy(state).cpu().data.squeeze().numpy())
             else:
@@ -166,7 +163,7 @@ class DDQN_Agent:
         if self.memory.tree.n_entries < self.batch_size:
             return
 
-        states, actions, rewards, next_states, idxs, is_weights = self.memory.sample(self.batch_size)
+        states, actions, rewards, next_states, idxs, _ = self.memory.sample(self.batch_size)
 
         states = tuple(states)
         next_states = tuple(next_states)
@@ -182,7 +179,7 @@ class DDQN_Agent:
 
         errors = torch.abs(current_q.squeeze() - expected_q.squeeze()).cpu().detach().numpy()
 
-        # update priority
+        # Update priority
         for i in range(self.batch_size):
             idx = idxs[i]
             self.memory.update(idx, errors[i])
@@ -197,25 +194,28 @@ class DDQN_Agent:
 
         score_history = []
         reward_history = []
+        image_array = []
 
         if self.episode == -1:
             self.episode = 1
 
         for e in range(1, self.max_episodes + 1):
             start = time.time()
-            state, _ = self.env.reset()
+            state, next_state_image = self.env.reset()
+            image_array.append(next_state_image)
             steps = 0
             score = 0
+            
             while True:
                 state = self.transformToTensor(state)
 
                 action = self.act(state)
-                next_state, reward, done, _ = self.env.step(action)
+                next_state, reward, done, next_state_image = self.env.step(action)
+                image_array.append(next_state_image)
 
                 if steps == self.max_steps:
                     done = 1
 
-                #self.memorize(state, action, reward, next_state)
                 self.append_sample(state, action, reward, next_state)
                 self.learn()
 
@@ -246,7 +246,6 @@ class DDQN_Agent:
                         print('Free Memory:', self.convert_size(torch.cuda.get_device_properties(0).total_memory - (
                                 torch.cuda.max_memory_allocated() + torch.cuda.max_memory_reserved())))
 
-                        # tensorboard --logdir=runs
                         memory_usage_allocated = np.float64(round(torch.cuda.memory_allocated(0) / 1024 ** 3, 1))
                         memory_usage_cached = np.float64(round(torch.cuda.memory_reserved(0) / 1024 ** 3, 1))
 
@@ -260,7 +259,7 @@ class DDQN_Agent:
                     writer.add_scalars('General Look', {'score_history': score,
                                                         'reward_history': reward}, self.episode)
 
-                    # save checkpoint
+                    # Save checkpoint
                     if self.episode % self.save_interval == 0:
                         checkpoint = {
                             'episode': self.episode,
@@ -268,6 +267,15 @@ class DDQN_Agent:
                             'state_dict': self.policy.state_dict()
                         }
                         torch.save(checkpoint, self.save_dir + '//EPISODE{}.pt'.format(self.episode))
+
+                    # Convert images to video
+                    frameSize = (640, 360)
+                    video = cv2.VideoWriter("test_videos\\test_video_episode_{}_score_{}.avi".format(self.episode, score), cv2.VideoWriter_fourcc(*'DIVX'), 7, frameSize)
+                    
+                    for img in image_array:
+                        video.write(img)
+                    
+                    video.release()
 
                     if self.episode % self.network_update_interval == 0:
                         self.updateNetworks()
@@ -323,9 +331,8 @@ class DDQN_Agent:
                 print("Test is done, test time: ", stopWatch)
 
                 # Convert images to video
-                frameSize = (256, 144)
-                import cv2
-                video = cv2.VideoWriter("videos\\test_video_episode_{}_score_{}.avi".format(self.episode, score), cv2.VideoWriter_fourcc(*'DIVX'), 7, frameSize)
+                frameSize = (640, 360)
+                video = cv2.VideoWriter("test_videos\\test_video_episode_{}_score_{}.avi".format(self.episode, score), cv2.VideoWriter_fourcc(*'DIVX'), 7, frameSize)
 
                 for img in image_array:
                     video.write(img)

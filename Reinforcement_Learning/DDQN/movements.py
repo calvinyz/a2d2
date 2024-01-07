@@ -1,7 +1,7 @@
 import airsim
 from pyquaternion import Quaternion
 
-""" Go Straight Movement for the Drone """
+""" Go straight movement for the drone """
 def straight(client, speed, duration, direction, z):
     
     typeDrivetrain = airsim.DrivetrainType.MaxDegreeOfFreedom
@@ -20,25 +20,25 @@ def straight(client, speed, duration, direction, z):
     donre_vel_rota      = [velocities.x_val , velocities.y_val]
 
     # Perform the movement
-    client.moveByVelocityZAsync(vx         = donre_vel_rota[0] + mvm[0], #the already existing speed + the one the agent wants to add, smoother drive?
+    client.moveByVelocityZAsync(vx         = donre_vel_rota[0] + mvm[0],
                                     vy          = donre_vel_rota[1] + mvm[1],
                                     z           = z,
-                                    duration    = duration, #will last x secondes or will be stoped by a new command (put a time.sleep(0.5) next to it)
-                                    drivetrain  = typeDrivetrain, #the camera is indepedant of the movement, but the movement is w.r.t the cam orientation
-                                    yaw_mode    = airsim.YawMode(is_rate = True, yaw_or_rate = 0)).join() # True means that yaw_or_rate is seen as a degrees/sec
-
-""" Orient Right for the Drone """
+                                    duration    = duration,
+                                    drivetrain  = typeDrivetrain,
+                                    yaw_mode    = airsim.YawMode(is_rate = True, yaw_or_rate = 0)).join()
+    
+""" Orient right for the drone """
 def yaw_right(client, speed, duration):
     client.rotateByYawRateAsync(speed, duration).join()
 
-""" Orient Left for the Drone """
+""" Orient left for the drone """
 def yaw_left(client, speed, duration):
     client.rotateByYawRateAsync(-1*speed, duration).join()
 
-""" Go Up Movement for the Drone """
+""" Go up movement for the drone """
 def up(client, speed, duration):
     client.moveByVelocityZAsync(0, 0, -1*speed, duration).join()
 
-""" Go Down Movement for the Drone """
+""" Go down movement for the drone """
 def down(client, speed, duration):
     client.moveByVelocityZAsync(0, 0, speed, duration).join()

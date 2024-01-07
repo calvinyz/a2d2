@@ -5,9 +5,7 @@
 /Wildfire_Detection/DETR/lightning_logs/
 /Wildfire_Detection/YOLOv8/runs/
 /Wildfire_Detection/EfficientDet/EfficientDet-files/flame_annotated_v6i
+/Reinforcement_Learning/DDQN/set_position
 /Reinforcement_Learning/DDQN/runs
 /Reinforcement_Learning/DDQN/saved_models
-/Reinforcement_Learning/DDQN/videos
-/Reinforcement_Learning/DDQN/log.txt
-/Reinforcement_Learning/DDQN/tests.txt
-
+/Reinforcement_Learning/DDQN/*_video
