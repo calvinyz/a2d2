@@ -6,3 +6,5 @@
 /Wildfire_Detection/YOLOv8/runs/
 /Wildfire_Detection/EfficientDet/EfficientDet-files/flame_annotated_v6i
 /Reinforcement_Learning/DDQN/set_position
+*_backup*
+*runs*

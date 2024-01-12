@@ -21,9 +21,6 @@ class DroneEnv(object):
         self.move(action)
        
         collision = self.client.simGetCollisionInfo().has_collided
-
-        time.sleep(0.5)
-
         state, image, detections = self.get_obs()
         result, done = self.compute_reward(collision, detections)
         
@@ -65,36 +62,20 @@ class DroneEnv(object):
             # Choose object with highest confidence 
             max_conf = 0
             best_object = None
-            for conf in zip(detections[0].boxes.conf):
-                if conf > max_conf:
-                    max_conf = conf
-                    best_object = conf
+            boxes_conf = detections[0].boxes.conf
+            max_conf = max(boxes_conf.tolist()) if len(boxes_conf.tolist()) > 0 else 0
+            print(f'Confidence: {max_conf}')
+            best_object = max_conf
 
-            # Adjust reward based confidence level
-            if max_conf > 0.2:
-                reward += 50
-            elif max_conf > 0.3:
-                reward += 100
-            elif max_conf > 0.4:
-                reward += 150
-            elif max_conf > 0.5:
-                reward += 200
-            elif max_conf > 0.6:
-                reward += 250
-            elif max_conf > 0.7:
-                reward += 300
-            elif max_conf > 0.8:
-                reward += 350
-            elif max_conf > 0.9:
-                reward += 400
+            reward = round(max_conf * 10)
 
         done = 0
         if reward == 0:
             done = 1
-            time.sleep(1)
-        elif reward > 249:
+        elif reward > 100:
             done = 1
-            time.sleep(1)
+
+        print(f'Reward: {reward}')
 
         return reward, done
 
