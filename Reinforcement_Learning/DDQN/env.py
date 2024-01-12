@@ -67,12 +67,10 @@ class DroneEnv(object):
             print(f'Confidence: {max_conf}')
             best_object = max_conf
 
-            reward = round(max_conf * 10)
+            reward = round(max_conf * 100)
 
         done = 0
-        if reward == 0:
-            done = 1
-        elif reward > 100:
+        if reward < 0 or reward > 80:
             done = 1
 
         print(f'Reward: {reward}')
@@ -91,28 +89,28 @@ class DroneEnv(object):
 
         # Orient right
         if action == 1:
-            movements.yaw_right(self.client, 50, 0.2)
+            movements.yaw_right(self.client, 2, 0.2)
 
         # Orient left
         if action == 2:
-            movements.yaw_left(self.client, 50, 0.2)
+            movements.yaw_left(self.client, 2, 0.2)
 
         # Go straight
         if action == 3:
-            movements.straight(self.client, 12, 0.3, "straight", -2)
+            movements.straight(self.client, 2, 0.3, "straight", -2)
 
         # Go right
         if action == 4:
-            movements.straight(self.client, 6, 0.3, "right", -2)
+            movements.straight(self.client, 2, 0.3, "right", -2)
 
         # Go left
         if action == 5:
-            movements.straight(self.client, 6, 0.3, "left", -2)
+            movements.straight(self.client, 2, 0.3, "left", -2)
 
         # Go up
         if action == 6:
-            movements.up(self.client, 20, 0.2)
+            movements.up(self.client, 2, 0.2)
 
         # Go down
         elif action == 7:
-            movements.down(self.client, 20, 0.2)
+            movements.down(self.client, 2, 0.2)
