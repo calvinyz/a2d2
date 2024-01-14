@@ -54,7 +54,7 @@ class DDQN_Agent:
         self.network_update_interval = 10
         self.episode = -1
         self.steps_done = 0
-        self.max_steps = 99
+        self.max_steps = 50
 
         self.policy = DQN()
         self.target = DQN()
@@ -185,6 +185,8 @@ class DDQN_Agent:
             self.memory.update(idx, errors[i])
 
         loss = F.smooth_l1_loss(current_q.squeeze(), expected_q.squeeze())
+        loss_val = loss.item()
+        writer.add_scalar('loss', loss_val, self.episode)
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
