@@ -1,9 +1,9 @@
-import time
 from PIL import Image
 import numpy as np
 import airsim
 import movements
 import object_detection
+import torch
 
 MOVEMENT_INTERVAL = 1
 
@@ -55,25 +55,29 @@ class DroneEnv(object):
     def compute_reward(self, collision, detections):
         """ Compute reward based on quadcopter state, collision, and object detections """
         reward = 0
+        done = 0
 
         if collision:
-            reward = -50
-        else:
-            # Choose object with highest confidence 
-            max_conf = 0
-            best_object = None
-            boxes_conf = detections[0].boxes.conf
-            max_conf = max(boxes_conf.tolist()) if len(boxes_conf.tolist()) > 0 else 0
-            print(f'Confidence: {max_conf}')
-            best_object = max_conf
-
-            reward = round(max_conf * 100)
-
-        done = 0
-        if reward < 0 or reward > 80:
+            reward = -1
             done = 1
+        else:
+            if not detections or len(detections) == 0 or len(detections[0].boxes.xyxy) == 0:
+                reward = 0
+            else:            
+                bboxs = detections[0].boxes.xyxy
+                bbox = bboxs[0]
+                bbox_size = (bbox[2] - bbox[0]) * (bbox[3] - bbox[1])
+                bbox_size_ratio = bbox_size / 409600
+                bbox_center = (bbox[0] + bbox[2]) / 2, (bbox[1] + bbox[3]) / 2
+                bbox_x_offset_ratio = 1 - abs((bbox_center[0] - 320)/320)
+                bbox_y_offset_ratio = 1 - abs((bbox_center[1] - 320)/320)
+        
 
-        print(f'Reward: {reward}')
+                if reward > 60 or bbox_size_ratio > 0.125: # cannot be too close to fire)
+                    done = 1
+
+                reward = int(bbox_size_ratio * 200 + bbox_x_offset_ratio * 25 + bbox_y_offset_ratio * 25)
+                print(f'Reward: {reward}. s: {bbox_size_ratio:.2f}, x: {bbox_x_offset_ratio:.2f}, y: {bbox_y_offset_ratio:.2f}. Done: {done}')
 
         return reward, done
 
