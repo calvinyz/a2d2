@@ -11,6 +11,7 @@
 *test_videos*
 log.txt
 tests.txt
-*.png
 *.jpg
 *.txt
+images_0/
+tb_logs/
