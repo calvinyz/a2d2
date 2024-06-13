@@ -14,7 +14,7 @@ The system is driven by AI models and automated solutions, including:
 - Coverage path planning (CPP) method managing patrol navigation
 - Deep reinforcement learning (DRL) model controlling drone’s path towards the detected wildfires for inspection
 
-<img width="30%" height="30%" src="./images/System_Design.png" />
+<img width="30%" height="30%" src="./images/system_design.png" />
 
 ## Models and Solutions
 - Grid search optimization for drone altitude and camera tilt angle: Use a single fixed wildfire as the detection target,  repeatedly move the drone to different altitudes to test vision-based wildfire detection with different camera tilt angles from multiple locations at each altitude, and select the value set achieving the best wildfire detection accuracy at the highest altitude as the optimal parameters for the patrol stage flight. 
