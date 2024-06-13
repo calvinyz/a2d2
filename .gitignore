@@ -11,3 +11,6 @@
 *test_videos*
 log.txt
 tests.txt
+*.png
+*.jpg
+*.txt
