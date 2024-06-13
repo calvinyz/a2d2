@@ -15,3 +15,9 @@ tests.txt
 *.txt
 images_0/
 tb_logs/
+*.zip
+*.pt
+*.npz
+*.cache
+*.yaml
+*.mp4
