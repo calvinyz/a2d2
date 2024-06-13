@@ -1,9 +1,0 @@
-efficientnet_pytorch
-
-
-tensorboardX
-git+https://github.com/abhi-kumar/cocoapi.git#egg=pycocotools&subdirectory=PythonAPI
-
-
-dicttoxml
-xmltodict
