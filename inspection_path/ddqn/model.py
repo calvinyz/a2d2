@@ -54,7 +54,7 @@ class DDQN_Agent:
         self.network_update_interval = 10
         self.episode = -1
         self.steps_done = 0
-        self.max_steps = 50
+        self.max_steps = 200
 
         self.policy = DQN()
         self.target = DQN()
@@ -213,6 +213,7 @@ class DDQN_Agent:
 
                 action = self.act(state)
                 next_state, reward, done, next_state_image = self.env.step(action)
+                print(f"Epside: {self.episode}: Step {steps}")
                 image_array.append(next_state_image)
 
                 if steps == self.max_steps:
