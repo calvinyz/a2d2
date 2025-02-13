@@ -67,7 +67,6 @@ Features:
 - Efficient area coverage with minimal path overlap
 - Systematic progression from center to perimeter
 - Strategic waypoint placement at GCC centers
-- Optimized for single-drone operation
 
 ### Deep Computer Vision Model
 Primary Models Evaluated:
@@ -79,6 +78,20 @@ Primary Models Evaluated:
 
 ### Deep Reinforcement Learning Model
 DRL implementation using sum of weighted bounding box size and weighted bounding box center offsets in x, y as reward function.
+
+Primary Models Evaluated:
+1. **PPO (Proximal Policy Optimization)**
+   - Policy gradient method with clipped objective
+   - Stable training through trust region optimization
+
+2. **A2C (Advantage Actor-Critic)**
+   - Combines value and policy-based methods
+   - Lower variance than pure policy gradient
+
+3. **DQN (Deep Q-Network)**
+   - Value-based method with experience replay
+   - Stable learning through target networks
+   - Effective in discrete action spaces
 
 Key features:
 - Optimized for inspection phase navigation
@@ -103,7 +116,6 @@ Comparison of YOLOv8, DETR, EfficientDet, Faster R-CNN, RetinaNet models:
 | Model | YOLOv8 | Faster R-CNN | DETR | EfficientDet | RetinaNet |
 |------- | ------- | ------- | ------- | ------- | ------- |
 | mAP5 | 0.913 | 0.916 | 0.748 | 0.663 | 0.763 |
-| Description and Uniqueness | Single-shot with modified CSPDarknet53 with self-attention mechanism and feature pyramid network (FPN) | Two-shot with a region of interest (ROI) pooling layer and region proposal network (RPN) | Transformer on CNN backbone and feed-forward network (FFN) |  Single-shot with weighted bi-directional feature pyramid network (BiFPN) scaling method | Single-shot with focal loss function to address class imbalance during training |
 
 ### Testing DRL models
 
@@ -125,7 +137,6 @@ System Performance:
 - Python 3.8+
 - AirSim 1.8.1
 - Unreal Engine 4.27.2
-- YOLOv8 dependencies
 - PyTorch 1.9+
 
 ## Contact
